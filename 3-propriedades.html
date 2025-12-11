@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocketseat React.js - Fundamentos</title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+
+        const buttonsVariant = {
+            default: 'bg-gray-500',
+            primary: 'bg-purple-500'
+        };
+        // The param '...props' send the information forward
+        const Button = ({ variant = 'default', className, children, ...props }) => {
+            return (
+                <button
+                    className={`
+                        px-3 py-2 rounded-2xl text-white border border-gray-300
+                        ${buttonsVariant[variant]}
+                        ${className}
+                    `}
+                    // This way i can use inside the element
+                    {...props}
+                >
+                    {children}
+                </button>
+            );
+        };
+
+        function App() {
+            return (
+                <main className="p-3 flex gap-3">
+                    <Button type="button" title="Meu Botão!" className="mr-14">
+                        Clique aqui!
+                    </Button>
+                    <Button variant="primary">
+                        Compre Agora!
+                    </Button>
+                </main>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+
+        root.render(
+            <App />
+        );
+    </script>
+</body>
+
+</html>
