@@ -4,6 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Calistoga&family=Rubik&display=swap" rel="stylesheet">
     <title>Rocketseat React.js - Fundamentos</title>
 
     <style type="text/tailwindcss">
@@ -11,6 +14,7 @@
             --text:#EBEBEB;
             --text-secondary: #6B6B6B;
             --primary: #462878;
+            --secondary: #7F45E2;
             --background: #2D2A37;
 
             --gradient: 180deg,
@@ -32,7 +36,7 @@
     </style>
 </head>
 
-<body>
+<body class="bg-gray-700 text-xl text-(--text) font-(--font-sans)">
     <div id="root">
 
     </div>
@@ -43,6 +47,463 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
     <script type="text/babel">
+
+        const textVariants = {
+            muted: "text-(--text-secondary)",
+            normal: "text-2xl",
+            blast: "text-4xl"
+        }
+
+        function Text({
+            as = 'span',
+            children,
+            variant,
+            className = '',
+            ...props
+        }) {
+            return (
+                React.createElement(
+                    as,
+                    {
+                        className: `
+                            ${className} 
+                            ${textVariants[variant]}
+                        `,
+                        ...props
+                    },
+                    children
+                )
+            )
+        }
+
+        const buttonVariants = {
+            default: 'bg-(--background)',
+            primary: 'bg-(--primary)',
+            secondary: 'bg-(--secondary)'
+        }
+
+        function Button({
+            h = "h-16",
+            w = "w-16",
+            variant = 'default',
+            className = '',
+            children,
+            ...props }) {
+            return (
+                <Text
+                    as="button"
+                    variant="normal"
+                    className={`
+                        flex items-center justify-center rounded-xl p-3 cursor-pointer
+                        bg-linear-(--gradient) shadow-(--shadow) 
+                        hover:bg-linear-(--gradient-hover)
+                        ${h} ${w}
+                        ${buttonVariants[variant]}
+                        ${className} 
+                    `}
+                    {...props}
+                >
+                    {children}
+                </Text>
+            )
+        }
+
+        function Card({ className = '', children, ...props }) {
+            return (
+                <div
+                    className={`
+                        bg-(--back-ground) shadow-(--shadow)
+                        rounded-2xl h-[570px]
+                        ${className}                    
+                    `}
+                    {...props}
+                >
+                    {children}
+                </div>
+            )
+        }
+
+        function CalculatorDisplay({
+            fisrtParam,
+            secondParam,
+            result,
+            operation,
+            isEqual
+        }) {
+            return (
+                <div className="
+                    flex flex-col gap-2 px-[1.375rem] cursor-default select-none h-16
+                ">
+                    <Text
+                        variant="muted"
+                        className="flex items-center justify-end px-5"
+                    >
+                        {
+                            fisrtParam &&
+                            !secondParam &&
+                            !result &&
+                            !isEqual &&
+                            ''
+                        }
+
+                        {
+                            fisrtParam &&
+                            !result &&
+                            operation &&
+                            `${fisrtParam} ${operation}`
+                        }
+
+                        {
+                            fisrtParam &&
+                            secondParam &&
+                            result &&
+                            isEqual &&
+                            `${fisrtParam} ${operation} ${secondParam}`
+                        }
+
+
+                    </Text>
+                    <div
+                        className="flex items-center justify-between px-5"
+                    >
+                        <Text
+                            variant="muted"
+                        >
+                            {isEqual && '='}
+                        </Text>
+                        <Text
+                            variant="blast"
+                        >
+                            {
+                                fisrtParam &&
+                                !secondParam &&
+                                !result &&
+                                !isEqual &&
+                                !operation &&
+                                `${fisrtParam}`
+                            }
+                            {
+                                fisrtParam &&
+                                secondParam &&
+                                !result &&
+                                !isEqual &&
+                                operation &&
+                                `${secondParam}`
+                            }
+                            {
+                                fisrtParam &&
+                                secondParam &&
+                                result &&
+                                isEqual &&
+                                operation &&
+                                `${result}`
+                            }
+                        </Text>
+                    </div>
+                </div>
+            )
+        }
+
+        const ButtonsKeyboard = [
+            [
+                { input: 'CE', },
+                { input: 'C', className: 'flex-1' },
+                { input: '/', variant: 'primary' }
+            ],
+            [
+                { input: 7 },
+                { input: 8 },
+                { input: 9 },
+                { input: '*', variant: 'primary' },
+            ],
+            [
+                { input: 4 },
+                { input: 5 },
+                { input: 6 },
+                { input: '-', variant: 'primary' },
+            ],
+            [
+                { input: 1 },
+                { input: 2 },
+                { input: 3 },
+                { input: '+', variant: 'primary' },
+            ],
+            [
+                { input: 0, className: 'flex-1' },
+                { input: ',' },
+                { input: '=', variant: 'secondary' }
+            ],
+        ]
+
+        function CalculatorKeyboard({ onClickBtn }) {
+            return (
+                <div className="flex flex-col gap-3">
+                    {ButtonsKeyboard.map((row, index) => (
+                        <div key={`row-${index}`} className="flex gap-3">
+
+                            {row.map(btn => (
+                                <Button
+                                    key={`${index}-${btn.input}`}
+                                    onClick={() => onClickBtn(btn.input)}
+                                    className={btn.className}
+                                    variant={btn.variant}
+                                >
+                                    {btn.input}
+                                </Button>
+                            ))}
+
+
+                        </div>
+                    ))}
+
+                </div>
+            )
+        }
+
+        function Calculator({ history, setHistory }) {
+            const [firstParam, setFirstParam] = React.useState(null);
+            const [secondParam, setSecondParam] = React.useState(null);
+            const [isFirstParam, setIsFirstParam] = React.useState(true);
+            const [result, setResult] = React.useState(null);
+            const [operation, setOperation] = React.useState(null);
+            const [isEqual, setIsEqual] = React.useState(false);
+            const [canComma, setCanComma] = React.useState(true);
+
+            function onClickBtn(input) {
+
+                if (isEqual) {
+                    if (/[+\-*/]/.test(input)) {
+                        setFirstParam(result);
+                        setSecondParam(null);
+                        setResult(null);
+                        setIsEqual(false);
+                    } else if (typeof input === 'number' || (input === ',' && canComma)) {
+                        setFirstParam(input === ',' ? '0,' : input);
+                        setSecondParam(null);
+                        setIsFirstParam(true);
+                        setOperation(null);
+                        setResult(null);
+                        setIsEqual(false);
+                        setCanComma(true);
+                        return;
+                    }
+                }
+
+                // Check for a number in the input
+                if (typeof input === 'number' || (input === ',' && canComma)) {
+                    if (isFirstParam) {
+                        if (input === ',' && !firstParam) {
+                            setFirstParam('0,');
+                        } else {
+                            setFirstParam(prevent => firstParam ? `${prevent}${input}` : `${input}`);
+                        }
+                    } else {
+                        if (input === ',' && !secondParam) {
+                            setSecondParam('0,');
+                        } else {
+                            setSecondParam(prevent => secondParam ? `${prevent}${input}` : `${input}`);
+                        }
+                    }
+
+                    if (input === ',') {
+                        setCanComma(false);
+                    }
+                    return;
+                };
+
+                // Check for mathematical operators in the string
+                if (/[+\-*/]/.test(input) && firstParam && !operation) {
+                    setIsFirstParam(false);
+                    setOperation(input);
+                    setCanComma(true);
+                    return;
+                } else if (input === '-') {
+                    if (isFirstParam) {
+                        setFirstParam('-')
+                    } else {
+                        setSecondParam('-')
+                    }
+                };
+
+                // Check for CE in the input
+                if (input === 'CE') {
+                    if (isFirstParam) {
+                        setFirstParam(null);
+                        return;
+                    } else if (!result) {
+                        setSecondParam(null);
+                        return;
+                    } else {
+                        setResult(null);
+                        setSecondParam(null);
+                        setIsEqual(false);
+                        return;
+                    }
+
+
+                };
+
+                // Check for C in the input
+                if (input === 'C') {
+                    setFirstParam(null);
+                    setSecondParam(null);
+                    setIsFirstParam(true);
+                    setOperation(null);
+                    setResult(null);
+                    setIsEqual(false);
+                    setCanComma(true);
+                    return;
+                };
+
+
+                if (input === '=' && firstParam && secondParam) {
+                    const newParam = result || firstParam;
+
+                    doCalc(newParam, secondParam);
+                    setFirstParam(newParam);
+
+                    return;
+                }
+
+            }
+
+            function doCalc(firstParam, secondParam) {
+                if (String(firstParam).includes(',')) {
+                    firstParam = Number(String(firstParam).replace(',', '.'))
+                }
+                if (String(secondParam).includes(','))
+                    secondParam = Number(String(secondParam).replace(',', '.'))
+            }
+            let result = 0;
+
+            switch (operation) {
+                case '+':
+                    result = Number(firstParam) + Number(secondParam)
+                    break;
+                case '-':
+                    result = Number(firstParam) - Number(secondParam)
+                    break;
+                case '/':
+                    result = Number(firstParam) / Number(secondParam)
+                    break;
+                case '*':
+                    result = Number(firstParam) * Number(secondParam)
+                    break;
+                default:
+                    break;
+            }
+            if (result % 1 !== 0) {
+                const cleanNumber = Number(result.toFixed(4).replace(/\.?0+$/, ''));
+                result = cleanNumber.toLocaleString('pt-BR');
+            }
+            setResult(result);
+            setIsEqual(true);
+
+            setHistory([{
+                firstParam,
+                operation,
+                secondParam,
+                result
+            },
+            ...history
+            ]
+            )
+        }
+
+
+
+        return (
+            <Card
+                className={`
+                        flex flex-col gap-[1.625rem] w-[22.25rem]
+                        p-8 pt-14
+                    `}
+            >
+                <CalculatorDisplay
+                    fisrtParam={firstParam}
+                    secondParam={secondParam}
+                    operation={operation}
+                    result={result}
+                    isEqual={isEqual}
+                />
+
+                <CalculatorKeyboard
+                    doCalc={doCalc}
+                    onClickBtn={onClickBtn}
+                />
+
+            </Card>
+        )
+        }
+
+        function Heading() {
+            return (
+                <Text variant="normal" className='mx-auto'>
+                    Histórico de Operações
+                </Text>
+            )
+        }
+
+        function HistoryTable({ history, setHistory }) {
+            return (
+                <div className="flex flex-col gap-3">
+                    {history.map((item, index) => (
+                        <Text as="div">
+                            {item.firstParam} {item.operation} {item.secondParam} = {item.result}
+                        </Text>
+                    ))}
+                </div>
+            )
+        }
+
+        function History({ history, setHistory }) {
+            function handleCleanClick() {
+                setHistory([]);
+            }
+            return (
+                <Card
+                    className={`
+                        flex flex-col gap-4 min-w-[518px] p-8 pt-10
+                    `}
+                >
+                    <div className="flex flex-col h-full gap-4">
+                        <Heading />
+                        <HistoryTable history={history} setHistory={setHistory} />
+                        <Button
+                            className='w-full text-base mx-auto mt-auto'
+                            h='h-8'
+                            w='max-w-40'
+                            variant='secondary'
+                            onClick={handleCleanClick}
+                        >
+                            Limpar Histórico
+                        </Button>
+                    </div>
+                </Card>
+            )
+        }
+
+        function Content() {
+            const [history, setHistory] = React.useState([]);
+
+            return (
+                <div className="flex gap-8 h-580px]">
+                    <Calculator history={history} setHistory={setHistory} />
+                    <History history={history} setHistory={setHistory} />
+                </div>
+            )
+        }
+
+        function App() {
+            return (
+                <main className="flex justify-center items-center h-screen">
+                    <Content />
+                </main>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById("root"));
+        root.render(<App />);
 
     </script>
 </body>
