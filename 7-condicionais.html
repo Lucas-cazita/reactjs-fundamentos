@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocketseat React.js - Fundamentos</title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+
+
+
+
+        function Counter() {
+            const [count, setCount] = React.useState(0);
+
+            if (count > 20) {
+                return (
+                    <div>
+                        <p>Maior que 20</p>
+                        <button
+                            onClick={() => setCount(0)}
+                        >Zerar</button>
+                    </div>
+                )
+            }
+
+            return (
+                <div>
+                    <p>Contador: {count}</p>
+                    <p>{count > 10 ? 'Maior que 10' : 'Menor ou igual a que 10'}</p>
+                    {count > 15 && <p>Maior que 15</p>}
+                    <button
+                        onClick={() => setCount(10)}
+                    >Atualizar</button>
+                    <button
+                        onClick={() => setCount(prev => prev + 1)}
+                    >Incrementar</button>
+                    <button
+                        onClick={() => setCount(prev => prev - 1)}
+                    >Decrementar</button>
+                </div>
+            )
+        }
+
+
+        function App() {
+            return (
+                <main>
+                    <Counter />
+                </main>
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />)
+    </script>
+</body>
+
+</html>
