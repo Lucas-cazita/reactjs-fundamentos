@@ -235,6 +235,26 @@
             ],
         ]
 
+        const CalculatorContext = React.createContext();
+
+        function CalculatorProvider({ children }) {
+            const [saved, setSaved] = React.useState([]);
+
+            function onSave(result) {
+                setSaved((prev) => [...prev, result])
+            }
+
+            function cleanHistory() {
+                setSaved([])
+            }
+
+            return (
+                <CalculatorContext.Provider value={{ saved, onSave, cleanHistory }}>
+                    {children}
+                </CalculatorContext.Provider>
+            )
+        }
+
         function CalculatorKeyboard({ onClickBtn }) {
             return (
                 <div className="flex flex-col gap-3">
@@ -260,7 +280,7 @@
             )
         }
 
-        function Calculator({ history, setHistory }) {
+        function Calculator() {
             const [firstParam, setFirstParam] = React.useState(null);
             const [secondParam, setSecondParam] = React.useState(null);
             const [isFirstParam, setIsFirstParam] = React.useState(true);
@@ -268,6 +288,8 @@
             const [operation, setOperation] = React.useState(null);
             const [isEqual, setIsEqual] = React.useState(false);
             const [canComma, setCanComma] = React.useState(true);
+
+            const { onSave } = React.useContext(CalculatorContext);
 
             function onClickBtn(input) {
 
@@ -398,17 +420,13 @@
                 }
                 setResult(result);
                 setIsEqual(true);
-                setOperation(null);
 
-                setHistory([{
+                onSave({
                     firstParam,
                     operation,
                     secondParam,
                     result
-                },
-                ...history
-                ]
-                )
+                })
             }
 
 
@@ -445,11 +463,13 @@
             )
         }
 
-        function HistoryTable({ history, setHistory }) {
+        function HistoryTable() {
+            const { saved } = React.useContext(CalculatorContext);
+
             return (
                 <div className="flex flex-col gap-3">
-                    {history.map((item, index) => (
-                        <Text as="div">
+                    {saved.map((item, index) => (
+                        <Text as="div" key={`${index}-${item}`}>
                             {item.firstParam} {item.operation} {item.secondParam} = {item.result}
                         </Text>
                     ))}
@@ -457,9 +477,11 @@
             )
         }
 
-        function History({ history, setHistory }) {
+        function History() {
+            const { cleanHistory } = React.useContext(CalculatorContext);
+
             function handleCleanClick() {
-                setHistory([]);
+                cleanHistory();
             }
             return (
                 <Card
@@ -469,7 +491,7 @@
                 >
                     <div className="flex flex-col h-full gap-4">
                         <Heading />
-                        <HistoryTable history={history} setHistory={setHistory} />
+                        <HistoryTable />
                         <Button
                             className='w-full text-base mx-auto mt-auto'
                             h='h-8'
@@ -498,7 +520,9 @@
         function App() {
             return (
                 <main className="flex justify-center items-center h-screen">
-                    <Content />
+                    <CalculatorProvider>
+                        <Content />
+                    </CalculatorProvider>
                 </main>
             );
         };
