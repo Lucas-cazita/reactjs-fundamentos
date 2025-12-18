@@ -371,69 +371,70 @@
                 if (String(firstParam).includes(',')) {
                     firstParam = Number(String(firstParam).replace(',', '.'))
                 }
-                if (String(secondParam).includes(','))
+                if (String(secondParam).includes(',')) {
                     secondParam = Number(String(secondParam).replace(',', '.'))
+                }
+                let result = 0;
+
+                switch (operation) {
+                    case '+':
+                        result = Number(firstParam) + Number(secondParam)
+                        break;
+                    case '-':
+                        result = Number(firstParam) - Number(secondParam)
+                        break;
+                    case '/':
+                        result = Number(firstParam) / Number(secondParam)
+                        break;
+                    case '*':
+                        result = Number(firstParam) * Number(secondParam)
+                        break;
+                    default:
+                        break;
+                }
+                if (result % 1 !== 0) {
+                    const cleanNumber = Number(result.toFixed(4).replace(/\.?0+$/, ''));
+                    result = cleanNumber.toLocaleString('pt-BR');
+                }
+                setResult(result);
+                setIsEqual(true);
+                setOperation(null);
+
+                setHistory([{
+                    firstParam,
+                    operation,
+                    secondParam,
+                    result
+                },
+                ...history
+                ]
+                )
             }
-            let result = 0;
-
-            switch (operation) {
-                case '+':
-                    result = Number(firstParam) + Number(secondParam)
-                    break;
-                case '-':
-                    result = Number(firstParam) - Number(secondParam)
-                    break;
-                case '/':
-                    result = Number(firstParam) / Number(secondParam)
-                    break;
-                case '*':
-                    result = Number(firstParam) * Number(secondParam)
-                    break;
-                default:
-                    break;
-            }
-            if (result % 1 !== 0) {
-                const cleanNumber = Number(result.toFixed(4).replace(/\.?0+$/, ''));
-                result = cleanNumber.toLocaleString('pt-BR');
-            }
-            setResult(result);
-            setIsEqual(true);
-
-            setHistory([{
-                firstParam,
-                operation,
-                secondParam,
-                result
-            },
-            ...history
-            ]
-            )
-        }
 
 
 
-        return (
-            <Card
-                className={`
+            return (
+                <Card
+                    className={`
                         flex flex-col gap-[1.625rem] w-[22.25rem]
                         p-8 pt-14
                     `}
-            >
-                <CalculatorDisplay
-                    fisrtParam={firstParam}
-                    secondParam={secondParam}
-                    operation={operation}
-                    result={result}
-                    isEqual={isEqual}
-                />
+                >
+                    <CalculatorDisplay
+                        fisrtParam={firstParam}
+                        secondParam={secondParam}
+                        operation={operation}
+                        result={result}
+                        isEqual={isEqual}
+                    />
 
-                <CalculatorKeyboard
-                    doCalc={doCalc}
-                    onClickBtn={onClickBtn}
-                />
+                    <CalculatorKeyboard
+                        doCalc={doCalc}
+                        onClickBtn={onClickBtn}
+                    />
 
-            </Card>
-        )
+                </Card>
+            )
         }
 
         function Heading() {
