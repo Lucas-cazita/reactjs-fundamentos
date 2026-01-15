@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocketseat React.js - Fundamentos</title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+
+        const CounterContext = React.createContext();
+
+        function CounterProvider({ children }) {
+            const [savedCounts, setSavedCounts] = React.useState([]);
+
+            function saveCount(count) {
+                setSavedCounts((prev) => [...prev, count]);
+            }
+
+            return (
+                <CounterContext.Provider value={{ savedCounts, saveCount }}>
+                    {children}
+                </CounterContext.Provider>
+            );
+        }
+
+        function Counter() {
+            const [count, setCount] = React.useState('');
+            const { saveCount } = React.useContext(CounterContext);
+            const inputRef = React.useRef(null)
+
+            function handleCLick() {
+                saveCount(count);
+                setCount('');
+                inputRef?.current?.focus();
+            }
+
+            return (
+                <div className="flex justify-center items-center gap-2">
+                    <input
+                        ref={inputRef}
+                        value={count}
+                        onChange={(e) => setCount(e.target.value)}
+                        onKeyDown={(e) => e.key === 'Enter' ? handleCLick() : null}
+                        type="text"
+                        placeholder="Escreva algo para adicionar"
+                        className="border p-2 w-80"
+                    />
+                    <button onClick={handleCLick} className="border p-2">
+                        Adicionar Valor
+                    </button>
+                </div>
+            )
+        }
+
+        function CounterList() {
+            const { savedCounts } = React.useContext(CounterContext);
+
+            return (
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <h1>Valores adicionados:</h1>
+                    <ul>
+                        {savedCounts.map((value, index) => (
+                            <li key={index}>{value}</li>
+                        ))}
+                    </ul>
+                </div>
+            )
+        }
+
+
+        function App() {
+            return (
+                <CounterProvider>
+                    <main className="flex flex-col gap-4 p-10">
+
+                        <Counter />
+                        <hr />
+                        <CounterList />
+
+                    </main>
+                </CounterProvider>
+
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />)
+    </script>
+</body>
+
+</html>

@@ -112,7 +112,7 @@
             return (
                 <div
                     className={`
-                        bg-(--back-ground) shadow-(--shadow)
+                        bg-(--background) shadow-(--shadow)
                         rounded-2xl h-[570px]
                         ${className}                    
                     `}
@@ -239,13 +239,33 @@
 
         function CalculatorProvider({ children }) {
             const [saved, setSaved] = React.useState([]);
+            const historyStorageKey = 'history';
+
+            React.useEffect(() => {
+                const savedHistory = localStorage.getItem(historyStorageKey)
+
+                setSaved(JSON.parse(savedHistory || '[]'))
+            }, [])
 
             function onSave(result) {
-                setSaved((prev) => [...prev, result])
+                setSaved((prev) => {
+                    const updateHistory = [...prev, result];
+
+                    localStorage.setItem(
+                        historyStorageKey,
+                        JSON.stringify(updateHistory)
+                    )
+
+                    return updateHistory;
+                })
             }
 
             function cleanHistory() {
-                setSaved([])
+                setSaved(() => {
+                    const empty = [];
+                    localStorage.setItem(historyStorageKey, JSON.stringify(empty));
+                    return empty;
+                });
             }
 
             return (
@@ -255,32 +275,7 @@
             )
         }
 
-        function CalculatorKeyboard({ onClickBtn }) {
-            return (
-                <div className="flex flex-col gap-3">
-                    {ButtonsKeyboard.map((row, index) => (
-                        <div key={`row-${index}`} className="flex gap-3">
-
-                            {row.map(btn => (
-                                <Button
-                                    key={`${index}-${btn.input}`}
-                                    onClick={() => onClickBtn(btn.input)}
-                                    className={btn.className}
-                                    variant={btn.variant}
-                                >
-                                    {btn.input}
-                                </Button>
-                            ))}
-
-
-                        </div>
-                    ))}
-
-                </div>
-            )
-        }
-
-        function Calculator() {
+        function useCalculator() {
             const [firstParam, setFirstParam] = React.useState(null);
             const [secondParam, setSecondParam] = React.useState(null);
             const [isFirstParam, setIsFirstParam] = React.useState(true);
@@ -289,10 +284,9 @@
             const [isEqual, setIsEqual] = React.useState(false);
             const [canComma, setCanComma] = React.useState(true);
 
-            const { onSave } = React.useContext(CalculatorContext);
+            const { onSave, saved } = React.useContext(CalculatorContext);
 
-            function onClickBtn(input) {
-
+            function doOperation(input) {
                 if (isEqual) {
                     if (/[+\-*/]/.test(input)) {
                         setFirstParam(result);
@@ -427,9 +421,47 @@
                     secondParam,
                     result
                 })
+
             }
 
 
+            return {
+                firstParam, secondParam, operation, result, isEqual, doCalc, doOperation
+            }
+        }
+
+        function CalculatorKeyboard({ onClickBtn }) {
+            return (
+                <div className="flex flex-col gap-3">
+                    {ButtonsKeyboard.map((row, index) => (
+                        <div key={`row-${index}`} className="flex gap-3">
+
+                            {row.map(btn => (
+                                <Button
+                                    key={`${index}-${btn.input}`}
+                                    onClick={() => onClickBtn(btn.input)}
+                                    className={btn.className}
+                                    variant={btn.variant}
+                                >
+                                    {btn.input}
+                                </Button>
+                            ))}
+
+
+                        </div>
+                    ))}
+
+                </div>
+            )
+        }
+
+        function Calculator() {
+            const { firstParam, secondParam, operation, result, isEqual, doCalc, doOperation } = useCalculator();
+            function onClickBtn(input) {
+
+                doOperation(input)
+
+            }
 
             return (
                 <Card
@@ -467,13 +499,24 @@
             const { saved } = React.useContext(CalculatorContext);
 
             return (
-                <div className="flex flex-col gap-3">
-                    {saved.map((item, index) => (
-                        <Text as="div" key={`${index}-${item}`}>
-                            {item.firstParam} {item.operation} {item.secondParam} = {item.result}
-                        </Text>
-                    ))}
-                </div>
+                <>
+                    {
+                        saved.length > 0 ?
+                            (
+                                <div className="flex flex-col gap-3">
+                                    {saved.map((item, index) => (
+                                        <Text as="div" key={`${index}-${item}`}>
+                                            {item.firstParam} {item.operation} {item.secondParam} = {item.result}
+                                        </Text>
+                                    ))}
+                                </div>
+                            ) : (
+                                <Text as="p" variant="muted" className="mx-auto">
+                                    No operations to show
+                                </Text>
+                            )
+                    }
+                </>
             )
         }
 
@@ -510,7 +553,7 @@
             const [history, setHistory] = React.useState([]);
 
             return (
-                <div className="flex gap-8 h-580px]">
+                <div className="flex gap-8 h-[580px]">
                     <Calculator history={history} setHistory={setHistory} />
                     <History history={history} setHistory={setHistory} />
                 </div>

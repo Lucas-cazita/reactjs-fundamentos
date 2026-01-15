@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rocketseat React.js - Fundamentos</title>
+</head>
+
+<body>
+    <div id="root">
+
+    </div>
+
+    <script src="https://unpkg.com/@tailwindcss/browser@4"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel">
+
+        function InputFocus() {
+            const [text, setText] = React.useState('');
+            const inputRef = React.useRef(null);
+
+            return (
+                <div className="flex gap-2">
+                    <input
+                        ref={inputRef}
+                        className="border p-2 w-60"
+                        value={text}
+                        onChange={(e) => setText(e.target.value)}
+                        placeholder="Clique no botão para focar"
+                    />
+                    <button
+                        className="border p-2"
+                        onClick={() => inputRef?.current?.focus()}
+                    >Focar no input</button>
+                </div>
+            )
+        }
+
+        function ScrollTracker() {
+            const containerRef = React.useRef(null);
+            const [scrollInfo, setScrollInfo] = React.useState({
+                scrollTop: 0,
+                scrollHeight: 0,
+                clientHeight: 0
+            })
+            const [scrollPercentage, setScrollPercentege] = React.useState(0)
+
+            function handleScroll() {
+                if (!containerRef.current) {
+                    return
+                }
+
+                const { scrollTop, scrollHeight, clientHeight } = containerRef.current;
+
+                setScrollInfo({
+                    scrollTop,
+                    scrollHeight,
+                    clientHeight
+                });
+
+                const maxScroll = scrollHeight - clientHeight;
+                const percentege = Math.round((scrollTop / maxScroll) * 100);
+
+
+
+                setScrollPercentege(percentege)
+            }
+
+            return (
+                <div className="space-y-4">
+                    <div
+                        className="border border-blue-500 h-60 overflow-y-auto p-4"
+                        ref={containerRef}
+                        onScroll={handleScroll}
+                    >
+                        <div className="space-y-4">
+                            {Array.from({ length: 20 }).map((_, index) => (
+                                <p
+                                    key={index}
+                                    className="bg-gray-200 rounded p-2"
+
+                                >
+                                    Item do conteúdo {index + 1}
+                                </p>
+                            ))}
+                        </div>
+                    </div>
+
+                    <ul className="space-y-2 list-disc">
+                        <li>Progresso do scroll: {scrollPercentage}%</li>
+                        <li>Onde está o sroll (scrollTop): {scrollInfo.scrollTop}</li>
+                        <li>Tamanho do Scroll (scrollHeight): {scrollInfo.scrollHeight}</li>
+                        <li>Tamanho do container (clientHeight): {scrollInfo.clientHeight}</li>
+
+                    </ul>
+                </div>
+            )
+        }
+
+        function App() {
+            return (
+                <main className="p-3 space-y-6">
+                    <InputFocus />
+                    <hr />
+                    <ScrollTracker />
+                </main>
+            )
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />)
+    </script>
+</body>
+
+</html>
